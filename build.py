@@ -283,8 +283,8 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
   </p>
   <div class="two">
     <div class="box">
-      <div class="chart"><canvas id="fees"></canvas></div>
-      <p class="err" id="err-fees">График не загрузился.</p>
+      <div class="chart"><canvas id="chart-fees"></canvas></div>
+      <p class="err" id="err-chart-fees">График не загрузился.</p>
       <p class="note">Одинаковый «грязный» рост 10% в год до выплат. Зелёный — почти без расходов. Жёлтый и красный — после типичных комиссий фонда.</p>
     </div>
     <div class="box">
@@ -366,8 +366,8 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
   </div>
 
   <div class="box" style="margin-top:1.4rem">
-    <div class="chart tall"><canvas id="dca"></canvas></div>
-    <p class="err" id="err-dca">График не загрузился.</p>
+    <div class="chart tall"><canvas id="chart-dca"></canvas></div>
+    <p class="err" id="err-chart-dca">График не загрузился.</p>
     <p class="note">Серая линия — сколько денег вы внесли. Зелёная — сколько стоит портфель. Последняя точка зелёной пересчитана на текущий спот ~$84 065.</p>
   </div>
 
@@ -441,8 +441,8 @@ function boot() {
   var feeYears=[]; for (i=0;i<16;i++) feeYears.push(2010+i);
   var a=100,b=100,c=100,A=[],B=[],C=[];
   for (i=0;i<feeYears.length;i++) { A.push(+a.toFixed(1)); B.push(+b.toFixed(1)); C.push(+c.toFixed(1)); a*=1.10; var g=10; b*=1+(g-2-0.2*(g-2))/100; c*=1+(g-2-0.3*(g-2))/100; }
-  mk('fees', {type:'line', data:{labels:feeYears, datasets:[{label:'Почти без комиссий (~10%)', data:A, borderColor:'#2db88a', tension:.25, pointRadius:0}, {label:'После 2% + 20%', data:B, borderColor:'#d4a017', tension:.25, pointRadius:0}, {label:'После 2% + 30%', data:C, borderColor:'#e35d4d', tension:.25, pointRadius:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}});
-  mk('dca', {type:'line', data:{labels:DCA.labels, datasets:[{label:'Сколько внесли $', data:DCA.inv, borderColor:'#6b8a9a', tension:.2, pointRadius:0, borderWidth:2}, {label:'Сколько стоит портфель $', data:DCA.val, borderColor:'#2db88a', fill:true, backgroundColor:'rgba(45,184,138,.12)', tension:.2, pointRadius:0, borderWidth:2}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}, scales:{x:{ticks:{maxTicks:10, autoSkip:true}}, y:{ticks:{callback:function(v){return '$'+v;}}}}}});
+  mk('chart-fees', {type:'line', data:{labels:feeYears, datasets:[{label:'Почти без комиссий (~10%)', data:A, borderColor:'#2db88a', tension:.25, pointRadius:0}, {label:'После 2% + 20%', data:B, borderColor:'#d4a017', tension:.25, pointRadius:0}, {label:'После 2% + 30%', data:C, borderColor:'#e35d4d', tension:.25, pointRadius:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}}});
+  mk('chart-dca', {type:'line', data:{labels:DCA.labels, datasets:[{label:'Сколько внесли $', data:DCA.inv, borderColor:'#6b8a9a', tension:.2, pointRadius:0, borderWidth:2}, {label:'Сколько стоит портфель $', data:DCA.val, borderColor:'#2db88a', fill:true, backgroundColor:'rgba(45,184,138,.12)', tension:.2, pointRadius:0, borderWidth:2}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}, scales:{x:{ticks:{maxTicks:10, autoSkip:true}}, y:{ticks:{callback:function(v){return '$'+v;}}}}}});
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
 else boot();
