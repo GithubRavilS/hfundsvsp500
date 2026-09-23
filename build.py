@@ -1,4 +1,40 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import json
+from pathlib import Path
+
+root = Path(__file__).resolve().parent
+dca = json.loads((root / "dca-data.json").read_text())
+m = dca["meta"]
+years = dca["years"]
+monthly = dca["monthly"]
+labels = [r["ym"] for r in monthly]
+inv = [r["inv"] for r in monthly]
+val = [r["val"] for r in monthly]
+val_now = val[:-1] + [m["value_now"]]
+dca_js = json.dumps({"labels": labels, "inv": inv, "val": val_now}, ensure_ascii=False)
+years_rows = "".join(
+    f'      <tr><td>{y["y"]}</td><td class="n">${y["invested"]:,}</td><td class="n">{y["btc"]:.4f}</td>'
+    f'<td class="n">${y["avg"]:,.0f}</td><td class="n">${y["value"]:,.0f}</td>'
+    f'<td class="n">{y["ret_pct"]:+.1f}%</td></tr>\n'
+    for y in years
+)
+
+spot_now = f"{m['spot_now']:,.0f}"
+ret_now = f"{m['ret_now']:.0f}"
+invested = f"{m['invested']:,.0f}"
+btc = f"{m['btc']:.4f}"
+avg_cost = f"{m['avg_cost']:,.0f}"
+value_now = f"{m['value_now']:,.0f}"
+value_old = f"{m['value_old']:,.0f}"
+pnl_now = f"{m['pnl_now']:,.0f}"
+spot_old = f"{m['spot_old']:,.0f}"
+ret_old = f"{m['ret_old']:.0f}"
+months = str(m["months"])
+as_of_old = m["as_of_old"]
+as_of_now = m["as_of_now"]
+
+html = r"""<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
@@ -102,7 +138,7 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
   <div class="kpis">
     <div class="kpi"><em>За 20 лет (отчёт SPIVA)</em><b>~92%</b><span>крупных активных фондов США проиграли простому индексу S&amp;P 500</span></div>
     <div class="kpi"><em>Спор Баффета, 10 лет</em><b>2.2% vs 7.1%</b><span>профессиональные «фонды фондов» после всех платежей vs индекс — в среднем за год</span></div>
-    <div class="kpi"><em>Покупка биткоина по $100/мес с 2021</em><b class="ok">+98%</b><span>пересчёт на цену ~$84,065 на 23.09.2026</span></div>
+    <div class="kpi"><em>Покупка биткоина по $100/мес с 2021</em><b class="ok">+__RET_NOW__%</b><span>пересчёт на цену ~$__SPOT_NOW__ на 23.09.2026</span></div>
   </div>
 </header>
 
@@ -312,21 +348,21 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
     Не пытаетесь угадать дно. Когда дорого — монет меньше. Когда дёшево — монет больше. Главное — не останавливаться.
   </div>
   <p>
-    Раньше, на срезе <b>2026-07-24</b>, биткоин был около <b>$64,958</b>.
+    Раньше, на срезе <b>__AS_OF_OLD__</b>, биткоин был около <b>$__SPOT_OLD__</b>.
     Мы посчитали простую серию: <b>$100 каждый месяц</b> с января 2021.
-    Уже тогда выходило хорошо: вложили $6,700, накопили примерно 0.1578 BTC,
-    портфель стоил около $10,251 — это <b>+53%</b> к вложениям.
+    Уже тогда выходило хорошо: вложили $__INVESTED__, накопили примерно __BTC__ BTC,
+    портфель стоил около $__VALUE_OLD__ — это <b>+__RET_OLD__%</b> к вложениям.
   </p>
   <p>
-    Сейчас, на <b>2026-09-23</b>, тот же мешок при цене около <b>$84,065</b>
-    стоит уже примерно <b>$13,266</b> — это <b>+98%</b>
-    (плюс около $6,566). Когда цена проседала, регулярные покупки всё равно работали.
+    Сейчас, на <b>__AS_OF_NOW__</b>, тот же мешок при цене около <b>$__SPOT_NOW__</b>
+    стоит уже примерно <b>$__VALUE_NOW__</b> — это <b>+__RET_NOW__%</b>
+    (плюс около $__PNL_NOW__). Когда цена проседала, регулярные покупки всё равно работали.
     Когда цена выросла — результат той же дисциплины стал ещё сильнее.
   </p>
   <div class="kpis">
-    <div class="kpi"><em>Вложено за 67 мес.</em><b class="gold">$6,700</b><span>$100 каждый месяц с января 2021</span></div>
-    <div class="kpi"><em>Сколько BTC накопилось</em><b class="ok">0.1578</b><span>средняя цена покупки ~$42,458</span></div>
-    <div class="kpi"><em>Сколько это стоит сейчас</em><b class="ok">$13,266</b><span>в июле 2026 было $10,251</span></div>
+    <div class="kpi"><em>Вложено за __MONTHS__ мес.</em><b class="gold">$__INVESTED__</b><span>$100 каждый месяц с января 2021</span></div>
+    <div class="kpi"><em>Сколько BTC накопилось</em><b class="ok">__BTC__</b><span>средняя цена покупки ~$__AVG_COST__</span></div>
+    <div class="kpi"><em>Сколько это стоит сейчас</em><b class="ok">$__VALUE_NOW__</b><span>в июле 2026 было $__VALUE_OLD__</span></div>
   </div>
 
   <div class="box" style="margin-top:1.4rem">
@@ -339,13 +375,7 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
   <div class="box">
     <table>
       <tr><th>Год</th><th class="n">Вложили</th><th class="n">Купили BTC</th><th class="n">Средняя цена года</th><th class="n">Оценка на старом споте*</th><th class="n">Результат*</th></tr>
-      <tr><td>2021</td><td class="n">$1,200</td><td class="n">0.0262</td><td class="n">$47,454</td><td class="n">$1,703</td><td class="n">+41.9%</td></tr>
-      <tr><td>2022</td><td class="n">$1,200</td><td class="n">0.0478</td><td class="n">$28,273</td><td class="n">$3,103</td><td class="n">+158.6%</td></tr>
-      <tr><td>2023</td><td class="n">$1,200</td><td class="n">0.0431</td><td class="n">$28,826</td><td class="n">$2,798</td><td class="n">+133.2%</td></tr>
-      <tr><td>2024</td><td class="n">$1,200</td><td class="n">0.0190</td><td class="n">$65,918</td><td class="n">$1,234</td><td class="n">+2.8%</td></tr>
-      <tr><td>2025</td><td class="n">$1,200</td><td class="n">0.0120</td><td class="n">$101,578</td><td class="n">$776</td><td class="n">-35.3%</td></tr>
-      <tr><td>2026</td><td class="n">$700</td><td class="n">0.0098</td><td class="n">$72,474</td><td class="n">$636</td><td class="n">-9.2%</td></tr>
-    </table>
+__YEARS_ROWS__    </table>
     <p class="note">*Оценка на цене июля 2026 (~$65k) — как в исходном расчёте. Годы просадки купили больше монет. Смысл DCA — не поймать идеальную точку, а не выпасть из плана.</p>
   </div>
 
@@ -384,7 +414,7 @@ td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:.88re
 </footer>
 
 <script>
-const DCA = {"labels": ["2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"], "inv": [100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0, 800.0, 900.0, 1000.0, 1100.0, 1200.0, 1300.0, 1400.0, 1500.0, 1600.0, 1700.0, 1800.0, 1900.0, 2000.0, 2100.0, 2200.0, 2300.0, 2400.0, 2500.0, 2600.0, 2700.0, 2800.0, 2900.0, 3000.0, 3100.0, 3200.0, 3300.0, 3400.0, 3500.0, 3600.0, 3700.0, 3800.0, 3900.0, 4000.0, 4100.0, 4200.0, 4300.0, 4400.0, 4500.0, 4600.0, 4700.0, 4800.0, 4900.0, 5000.0, 5100.0, 5200.0, 5300.0, 5400.0, 5500.0, 5600.0, 5700.0, 5800.0, 5900.0, 6000.0, 6100.0, 6200.0, 6300.0, 6400.0, 6500.0, 6600.0, 6700.0], "val": [95.26, 227.32, 403.86, 496.8, 401.54, 474.64, 684.7, 879.02, 911.43, 1382.13, 1378.93, 1214.13, 1102.61, 1343.52, 1524.99, 1354.01, 1241.65, 853.83, 1115.48, 1048.0, 1113.81, 1279.1, 1169.0, 1224.34, 1826.33, 1926.29, 2483.32, 2653.66, 2566.86, 2983.83, 2958.98, 2718.16, 2929.32, 3882.2, 4326.24, 4947.81, 5084.18, 7429.53, 8765.32, 7542.96, 8499.05, 7988.06, 8338.31, 7707.74, 8382.49, 9400.98, 13024.79, 12712.09, 14035.77, 11652.82, 11497.92, 13230.75, 14796.64, 15251.0, 16578.83, 15595.86, 16535.16, 15978.82, 13277.95, 12952.51, 11723.91, 10087.71, 10372.24, 11702.61, 11379.1, 9149.08, 13265.84]};
+const DCA = __DCA_JS__;
 function boot() {
   if (typeof Chart === 'undefined') {
     document.querySelectorAll('.err').forEach(function(e){ e.style.display='block'; e.textContent='Не загрузилась библиотека графиков.'; });
@@ -419,3 +449,27 @@ else boot();
 </script>
 </body>
 </html>
+"""
+
+repl = {
+    "__RET_NOW__": ret_now,
+    "__SPOT_NOW__": spot_now,
+    "__AS_OF_OLD__": as_of_old,
+    "__AS_OF_NOW__": as_of_now,
+    "__SPOT_OLD__": spot_old,
+    "__INVESTED__": invested,
+    "__BTC__": btc,
+    "__VALUE_OLD__": value_old,
+    "__VALUE_NOW__": value_now,
+    "__RET_OLD__": ret_old,
+    "__PNL_NOW__": pnl_now,
+    "__MONTHS__": months,
+    "__AVG_COST__": avg_cost,
+    "__YEARS_ROWS__": years_rows,
+    "__DCA_JS__": dca_js,
+}
+for k, v in repl.items():
+    html = html.replace(k, v)
+
+(root / "index.html").write_text(html, encoding="utf-8")
+print("wrote", root / "index.html", "bytes", len(html.encode()))
